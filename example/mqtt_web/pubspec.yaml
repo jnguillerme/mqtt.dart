@@ -1,0 +1,5 @@
+name: sample_pubspec
+description: A sample mqtt web application
+dependencies:
+  browser: any
+  mqtt: any

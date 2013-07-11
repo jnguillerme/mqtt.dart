@@ -1,0 +1,6 @@
+name: mqtt
+version: 0.1.0
+author: Jino
+description: mqtt dart client library
+dependencies:
+  unittest: any
