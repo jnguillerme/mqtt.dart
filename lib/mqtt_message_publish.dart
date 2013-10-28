@@ -29,7 +29,7 @@ class MqttMessagePublish extends MqttMessage {
   MqttMessagePublish.decode(List<int> data, [bool debugMessage = false]) : _msgID_MSB = 0, _msgID_LSB = 0, _payload = "", _payloadPos =0,  super.decode(data, debugMessage);
   
   bool operator == (MqttMessagePublish other) {
-        return ( super == other 
+        return ( super==(other) 
           && _msgID_MSB == other._msgID_MSB
           && _msgID_LSB == other._msgID_LSB
           && _topic == other._topic
@@ -87,7 +87,7 @@ class MqttMessagePublish extends MqttMessage {
     int pos = 0;
     num topicLength = 256 * data[pos++] + data[pos++];
     
-    _topic = UTF8.decode(data, pos, topicLength);
+    _topic = UTF8.decode(data.sublist(pos, topicLength+pos));
     pos += topicLength;
     
     if (QoS > 0) {      // QOS 1 and 2 include a message ID
@@ -108,7 +108,7 @@ class MqttMessagePublish extends MqttMessage {
     int payloadLen = len - _payloadPos;
     
     if (payloadLen <= data.length) {
-      _payload = UTF8.decode(data, 0, len - _payloadPos );
+      _payload = UTF8.decode(data.sublist(0, payloadLen) );
     } else {
       print("WARNING: Payload is truncated - Characters received: ${data.length} - expected: ${payloadLen} "); 
       _payload = UTF8.decode(data);

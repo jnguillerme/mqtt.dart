@@ -19,7 +19,7 @@ class MqttMessagePublishMatcher extends BaseMatcher {
 
 main() {
   useVMConfiguration();
-  
+
   testPublish("MqttMessagePublish QOS(0) - no retain", QOS_0, 0);
   testPublish("MqttMessagePublish QOS(1) - no retain", QOS_1, 0);
   testPublish("MqttMessagePublish QOS(2) - no retain", QOS_2, 0);
