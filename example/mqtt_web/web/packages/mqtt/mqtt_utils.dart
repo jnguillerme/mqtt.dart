@@ -8,21 +8,21 @@ part of mqtt_shared;
  * mqttMessageType
  * Define all possible mqtt message types
  */
-const num RESERVED = 0;
-const num CONNECT = 1;
-const num CONNACK = 2;
-const num PUBLISH = 3;
-const num PUBACK = 4;
-const num PUBREC = 5;
-const num PUBREL = 6;
-const num PUBCOMP = 7;
-const num SUBSCRIBE = 8;
-const num SUBACK = 9;
-const num UNSUBSCRIBE = 10;
-const num UNSUBACK = 11;
-const num PINGREQ = 12;
-const num PINGRESP = 13;
-const num DISCONNECT = 14;
+const int RESERVED = 0;
+const int CONNECT = 1;
+const int CONNACK = 2;
+const int PUBLISH = 3;
+const int PUBACK = 4;
+const int PUBREC = 5;
+const int PUBREL = 6;
+const int PUBCOMP = 7;
+const int SUBSCRIBE = 8;
+const int SUBACK = 9;
+const int UNSUBSCRIBE = 10;
+const int UNSUBACK = 11;
+const int PINGREQ = 12;
+const int PINGRESP = 13;
+const int DISCONNECT = 14;
   
 
 /**

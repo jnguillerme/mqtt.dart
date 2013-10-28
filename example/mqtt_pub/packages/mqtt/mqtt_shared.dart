@@ -1,8 +1,10 @@
 library mqtt_shared;
 
 import 'dart:async';
-import 'dart:utf';
 import 'mqtt_version_v3.dart' ;
+import "package:ini/ini.dart";
+import 'dart:io';
+import 'dart:convert';
 
 part 'mqtt_client.dart';
 part 'mqtt_connection_shared.dart';
@@ -18,3 +20,4 @@ part 'mqtt_message_unsubscribe.dart';
 part 'mqtt_message_unsuback.dart';
 part 'mqtt_message_disconnect.dart';
 part 'mqtt_message_ping.dart';
+part 'mqtt_options.dart';

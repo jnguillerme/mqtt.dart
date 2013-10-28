@@ -22,14 +22,14 @@ class MqttMessagePublish extends MqttMessage {
                                                 this._topic = topic, this._payload = payload,
                                                 this._msgID_MSB = ((QoS > 0) ? (msgID ~/ 256) : 0), 
                                                 this._msgID_LSB = ((QoS > 0) ? (msgID % 256) : 0),
-                                                super.setOptions(PUBLISH, (QoS > 0) ? (6 + encodeUtf8(topic).length + encodeUtf8(payload).length) 
-                                                                                    : (4 + encodeUtf8(topic).length + encodeUtf8(payload).length), 
+                                                super.setOptions(PUBLISH, (QoS > 0) ? (6 + UTF8.encode(topic).length + UTF8.encode(payload).length) 
+                                                                                    : (4 + UTF8.encode(topic).length + UTF8.encode(payload).length), 
                                                                          QoS, retain);
   
   MqttMessagePublish.decode(List<int> data, [bool debugMessage = false]) : _msgID_MSB = 0, _msgID_LSB = 0, _payload = "", _payloadPos =0,  super.decode(data, debugMessage);
   
   bool operator == (MqttMessagePublish other) {
-        return ( super == (other as MqttMessage)
+        return ( super == other 
           && _msgID_MSB == other._msgID_MSB
           && _msgID_LSB == other._msgID_LSB
           && _topic == other._topic
@@ -55,7 +55,7 @@ class MqttMessagePublish extends MqttMessage {
     _buf.add(_topic.length % 256);
     
     // add topic    
-    _buf.addAll(encodeUtf8(_topic));
+    _buf.addAll(UTF8.encode(_topic));
     
     // msg ID - only required for QoS 1 or 2
     if (QoS > 0) {
@@ -66,7 +66,7 @@ class MqttMessagePublish extends MqttMessage {
   
   encodePayload() {
     // payload
-    _buf.addAll(encodeUtf8(_payload));
+    _buf.addAll(UTF8.encode(_payload));
   }
 
   /**
@@ -87,7 +87,7 @@ class MqttMessagePublish extends MqttMessage {
     int pos = 0;
     num topicLength = 256 * data[pos++] + data[pos++];
     
-    _topic = decodeUtf8(data, pos, topicLength);
+    _topic = UTF8.decode(data, pos, topicLength);
     pos += topicLength;
     
     if (QoS > 0) {      // QOS 1 and 2 include a message ID
@@ -108,10 +108,10 @@ class MqttMessagePublish extends MqttMessage {
     int payloadLen = len - _payloadPos;
     
     if (payloadLen <= data.length) {
-      _payload = decodeUtf8(data, 0, len - _payloadPos );
+      _payload = UTF8.decode(data, 0, len - _payloadPos );
     } else {
       print("WARNING: Payload is truncated - Characters received: ${data.length} - expected: ${payloadLen} "); 
-      _payload = decodeUtf8(data);
+      _payload = UTF8.decode(data);
     }
   }  
 }

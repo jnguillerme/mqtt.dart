@@ -9,6 +9,10 @@ packages:
     description: meta
     source: hosted
     version: "0.5.20"
+  mqtt:
+    description: mqtt
+    source: hosted
+    version: "1.0.0"
   unittest:
     description: unittest
     source: hosted

@@ -1,6 +1,8 @@
 name: mqtt
-version: 0.1.0
-author: Jino
+version: 1.0.0
+author: Jean-Noel Guillerme <jnguillerme@hotmail.com>
 description: mqtt dart client library
+homepage: https://github.com/jnguillerme/mqtt.dart
 dependencies:
+  ini: any
   unittest: any

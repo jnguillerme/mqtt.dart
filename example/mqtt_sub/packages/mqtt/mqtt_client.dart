@@ -22,7 +22,6 @@ class MqttClient<E extends VirtualMqttConnection> {
    */
   MqttClient(E mqttConnection, {String clientID: '', num qos: 0x0, bool cleanSession:true} )
               : _mqttConnection = mqttConnection, _clientID = clientID, _qos = qos, _cleanSession = cleanSession, debugMessage = false, _will = null;  
-
   
   /**
    * setWill
@@ -192,11 +191,11 @@ class MqttClient<E extends VirtualMqttConnection> {
     * Return the data that has not been processed
     */
    List<int> _processMqttMessage(data) {
-     int type = data[0] >> 4;
+     num type = data[0] >> 4;
      int msgProcessedLength = data.length; 
      
      switch(type) {
-      case RESERVED:    // do nothing
+      case RESERVED:             //RESERVED do nothing
         break;
       case CONNACK: 
         msgProcessedLength = _handleConnack(data);
@@ -309,7 +308,8 @@ class MqttClient<E extends VirtualMqttConnection> {
         _mqttConnection.sendMessageToBroker(mAck, debugMessage);
         _resetTimer();      
       } 
-      
+    
+      print("[mqttClient] [" + m._topic + "][" + m._payload + "]");
       // notify the client of the new topic / payload
       if (onSubscribeData != null) onSubscribeData(m._topic, m._payload);
       

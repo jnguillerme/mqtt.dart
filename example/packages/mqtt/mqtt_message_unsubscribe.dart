@@ -36,6 +36,6 @@ class MqttMessageUnsubscribe extends MqttMessage {
     _buf.add(_topic.length ~/ 256);
     _buf.add(_topic.length % 256);
     
-    _buf.addAll(encodeUtf8(_topic));    
+    _buf.addAll(UTF8.encode(_topic));    
   }
 }

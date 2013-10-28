@@ -99,17 +99,21 @@ abstract class MqttMessage {
     _buf.add( ((type << 4) | (DUP << 3) | (QoS << 1) | retain) );   // byte 1
     
     // byte 2 - encode remaining length
-    num remLen = len - 2;
-    int digit;
-    do {
-      digit = remLen % 128;
-      remLen = remLen ~/ 128;
-      if ( remLen > 0 ) {
-        digit = (digit | 0x80);
-      }
-      _buf.add(digit);                                                  
-    } while (remLen > 0);
-    
+    if (len > 2) {
+      num remLen = len - 2;
+      int digit;
+      do {
+        digit = remLen % 128;
+        remLen = remLen ~/ 128;
+        if ( remLen > 0 ) {
+          digit = (digit | 0x80);
+        }
+        _buf.add(digit);                                                  
+      } while (remLen > 0);
+    }
+    else {
+      _buf.add(0);
+    }
   }
   /**
    * encodeVariableHeader

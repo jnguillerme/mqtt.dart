@@ -17,5 +17,5 @@ class MqttMessagePingReq extends MqttMessage {
  * 
  */
 class MqttMessagePingResp extends MqttMessage {
-  MqttMessagePingReq() :super(PINGRESP);
+  MqttMessagePingResp() :super(PINGRESP);
 } 
