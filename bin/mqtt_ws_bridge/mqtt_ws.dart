@@ -1,8 +1,7 @@
 import 'dart:io';
 import 'dart:async';
-import 'dart:utf';
-
-/**
+import 'package:args/args.dart';
+/**s
  * class MqttWsBridgeOptions
  * Handle options available for the mqtt_ws programm
  * 
@@ -12,43 +11,36 @@ import 'dart:utf';
  */
 
 class MqttWsBridgeOptions {
-  static Map<String, String> optionList = {
-                                           '-?': 'display help message',
-                                           '--mqttHost': 'Mqtt broker host to connect to. Default is 127.0.0.1',
-                                           '--mqttPort': 'Mqtt broker port to connect to. Default is 1883',
-                                           '--listeningPort' : 'Bridge listening port. Default is 8080' };
+  var options = ['mqttHost', 'mqttPort', 'listeningPort'];
+
   num listeningPort = 8080;
   String mqttHost = "127.0.0.1";
   num mqttPort = 1883;
-
-  void displayOptionsHelp() {
-    optionList.forEach((k,v) =>   print("${k} :  ${v}"));
-    exit(0);
-  }
   
-  bool setOption(String option, [String value = null]) {
-    bool valueUsed = true;
-
-    switch (option) {
-      case '--mqttHost': 
-        mqttHost = value;
-        break;
-      case '--mqttPort': 
-        mqttPort = int.parse(value);
-        break;
-      case '--listeningPort': 
-        listeningPort = int.parse(value);
-        break;
-      default: 
-        print("Unknown option $option");
-        displayOptionsHelp();
-        exit(-1);
-        break;
-    }
+  ArgParser argParser() {
+    var parser = new ArgParser();
     
-    return valueUsed;
+    parser.addOption('mqttHost', 
+                      abbr:'h', 
+                      defaultsTo: '127.0.0.1', 
+                      help: 'Mqtt broker host to connect to. Default is 127.0.0.1',
+                      callback: (host) => mqttHost = host);
+    
+    parser.addOption('mqttPort', 
+                      abbr:'p', 
+                      defaultsTo: '1883', 
+                      help: 'Mqtt broker port to connect to. Default is 1883',
+                      callback: (port) => mqttPort = int.parse(port));
+    
+    parser.addOption('listeningPort', 
+                      abbr:'P', 
+                      defaultsTo: '127.0.0.1', 
+                      help: 'Bridge listening port. Default is 8080',
+                      callback: (port) => listeningPort = int.parse(port));
+    
+    
+    return parser;
   }
-  
 }
 
 /**
@@ -123,18 +115,12 @@ class MqttWebSocketBridge {
  * main
  */
 void main() {
-  Options options = new Options();
-  MqttWsBridgeOptions bridgeOptions = new MqttWsBridgeOptions();
-
-  for (int i=0; i < options.arguments.length; i++) {
-    if (options.arguments[i].startsWith("-") && MqttWsBridgeOptions.optionList.containsKey(options.arguments[i])) {
-      if (bridgeOptions.setOption(options.arguments[i], ( (options.arguments.length > i + 1) ? options.arguments[i+1] : null ) ) ) {
-        i++;
-      }
-    }
-  }
-
+  print('starting...');
   
+  MqttWsBridgeOptions bridgeOptions = new MqttWsBridgeOptions();
+  bridgeOptions.argParser().parse(bridgeOptions.options);
+  
+  print('Bridgeoptions host : $bridgeOptions.mqttHost'); 
   HttpServer.bind('127.0.0.1', bridgeOptions.listeningPort)
     .then((HttpServer server) {
       print('listening for connections on ${bridgeOptions.listeningPort}');
