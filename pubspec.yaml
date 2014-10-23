@@ -4,5 +4,5 @@ author: Jean-Noel Guillerme <jnguillerme@hotmail.com>
 description: mqtt dart client library
 homepage: https://github.com/jnguillerme/mqtt.dart
 dependencies:
-  ini: any
+  ini: '>=1.0.0'
   unittest: '>=0.11.0'
