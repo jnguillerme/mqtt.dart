@@ -52,8 +52,8 @@ VM Example
 
 See mqtt_sub for a sample mqtt publish and mqtt_pub for a sample subscribe.
 Available options can be displayed through:
-	> dart mqtt_sub.dart -?
-	> dart mqtt_pub.dart -?
+	> dart mqtt_sub.dart -h
+	> dart mqtt_pub.dart -h
 
 Web Example
 -----------
