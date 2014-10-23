@@ -3,7 +3,7 @@ import 'package:unittest/vm_config.dart';
 
 import '../lib/mqtt_shared.dart';
 
-class MqttMessagePublishMatcher extends BaseMatcher {
+class MqttMessagePublishMatcher extends Matcher {
   MqttMessagePublish _expected;
   
   MqttMessagePublishMatcher(this._expected);
