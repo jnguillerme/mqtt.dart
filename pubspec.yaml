@@ -5,4 +5,4 @@ description: mqtt dart client library
 homepage: https://github.com/jnguillerme/mqtt.dart
 dependencies:
   ini: any
-  unittest: '>= 0.11'
+  unittest: '>=0.11.0'
