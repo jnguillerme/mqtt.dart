@@ -3,7 +3,6 @@ library mqtt_html_ws;
 import 'dart:html';
 import 'dart:async';
 import 'mqtt_shared.dart';
-import 'dart:utf';
 import 'dart:typed_data';
 
 class MqttConnectionHtmlWebSocket extends VirtualMqttConnection{
