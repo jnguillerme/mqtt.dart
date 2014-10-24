@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:mqtt/mqtt_shared.dart';
 import 'package:mqtt/mqtt_connection_io_socket.dart';
+import 'package:args/args.dart';
 
 /**
  * mqtt_sub
@@ -29,23 +30,6 @@ import 'package:mqtt/mqtt_connection_io_socket.dart';
  */
 
 class MqttSubOptions {
-  static Map<String, String> optionList = {
-                        '-?': 'display help message',
-                        '-c': 'disable clean session',
-                        '-d': 'enable debug message',
-                        '-h': 'host to connect to. Default is 127.0.0.1',
-                        '-p': 'port to connect to. Default is 1883',
-                        '-i': 'client ID',
-                        '-k': 'keep alive in seconds. Defaults is 60',
-                        '-t': 'topic',
-                        '-m': 'message payload',
-                        '-q': 'quality of service. Default is 0',
-                        '-u': 'provide a username',
-                        '-P': 'provide a password',
-                        '--will-payload': 'payload for the client will',
-                        '--will-qos': 'quality of service for the client will',
-                        '--will-retain': 'if provided, make the client will retain',
-                        '--will-topic': 'the topic on which to publish the client will'};
   
   bool debugMessage = false;
   bool cleanSession = true;
@@ -64,88 +48,111 @@ class MqttSubOptions {
   int willQoS = QOS_0;
   bool willRetain = false;
   
-   void displayOptionsHelp() {
-    optionList.forEach((k,v) =>   print("${k} :  ${v}"));
-    exit(0);
-  }
-  bool setOption(String option, [String value = null]) {
-    bool valueUsed = true;
-
-    switch (option) {
-      case '-?': 
-        displayOptionsHelp();
-        valueUsed = false;
-        break;
-      case '-d': 
-        valueUsed = false;
-        debugMessage = true;
-        break;
-      case '-c': 
-        valueUsed = false;
-        cleanSession = false;
-        break;
-      case '-h': 
-        host = value;
-        break;
-      case '-p': 
-        port = int.parse(value);
-        break;
-      case '-i':
-        clientID = value;
-        break;
-      case '-k':
-        keepAlive = int.parse(value);
-        break;
-      case '-t': 
-        topic = value;
-        break;
-      case '-m': 
-        payload = value;
-        break;
-      case '-q': 
-        QoS = int.parse(value);
-        break;
-      case '-u': 
-        user = value;
-        break;
-      case '-P': 
-        password = value;
-        break;
-      case '--will-payload': 
-        willPayload = value;
-        break;
-      case '--will-qos': 
-        willQoS = int.parse(value);
-        break;
-      case '--will-retain': 
-        valueUsed = false;
-        willRetain = true;
-        break;
-      case '--will-topic':
-        willTopic = value;
-        break;
-      default: 
-          print("Unknown option $option");
-          displayOptionsHelp();
-          exit(-1);
-          break;
-    }
+  ArgParser argParser() {    
     
-    return valueUsed;
-  }
+    var parser = new ArgParser();        
     
-}
-main() {
-  Options options = new Options();
-  MqttSubOptions mqttOptions = new MqttSubOptions();
-  
-  for (int i=0; i < options.arguments.length; i++) {
-    if (options.arguments[i].startsWith("-") && MqttSubOptions.optionList.containsKey(options.arguments[i])) {
-      if (mqttOptions.setOption(options.arguments[i], ( (options.arguments.length > i + 1) ? options.arguments[i+1] : null ) ) ) {
-        i++;
+    void _help(bool value) {
+      if(value) {
+        print(parser.getUsage());
+        exit(0);
       }
+    }  
+    void _topic(var t) {
+      topic = t;
     }
+    parser.addFlag(
+        "help", 
+        abbr:"h", 
+        help:"Prints this help.", 
+        negatable:false, 
+        callback:_help
+      );
+    parser.addFlag('clean',
+                    abbr: 'c',
+                    defaultsTo: true,
+                    help: 'enable clean session',
+                    callback: (c) => cleanSession = c);
+    
+    parser.addFlag('debug',
+                       abbr: 'd',
+                       help: 'enable debug message',
+                       callback: (d) => debugMessage = d);
+         
+    parser.addOption('mqttHost', 
+                      abbr:'H', 
+                      defaultsTo: '127.0.0.1', 
+                      help: 'Mqtt broker host to connect to',
+                      callback: (h) => host = h);
+    
+    parser.addOption('mqttPort', 
+                      abbr:'P', 
+                      defaultsTo: '1883', 
+                      help: 'Mqtt broker port to connect to',
+                      callback: (p) => port = int.parse(p));
+    
+    parser.addOption('clientId', 
+                      abbr:'i', 
+                      defaultsTo: 'mqtt_dart_sub', 
+                      help: 'client ID',
+                      callback: (id) => clientID = id);
+    
+    parser.addOption('keepAlive', 
+                      abbr:'k', 
+                      defaultsTo: '61', 
+                      help: 'keep alive in seconds',
+                      callback: (k) => keepAlive = int.parse(k));
+    
+    parser.addOption('topic', 
+                      abbr:'t', 
+                      help: 'topic',
+                      callback: (t) => _topic(t));
+    
+    parser.addOption('qos', 
+                      abbr:'q', 
+                      defaultsTo: '0', 
+                      help: 'quality of service',
+                      callback: (q) => QoS = int.parse(q));
+    
+    parser.addOption('user', 
+                      abbr:'u', 
+                      help: 'username',
+                      callback: (u) => user = u);
+    
+    parser.addOption('password', 
+                      abbr:'p', 
+                      help: 'password',
+                      callback: (p) => password = p);
+    
+    parser.addOption('willTopic', 
+                      abbr:'T', 
+                      help: 'Topic for the client will',
+                      callback: (wt) => willTopic = wt);    
+
+    parser.addOption('willMessage', 
+                      abbr:'M', 
+                      help: 'Message for the client will',
+                      callback: (wp) => willPayload = wp);    
+     
+    parser.addOption('willQos', 
+                      abbr:'Q', 
+                      defaultsTo: '0', 
+                      help: 'quality of service for the client will',
+                      callback: (wq) => willQoS = int.parse(wq));
+                        
+    parser.addFlag('willRetain',
+                      abbr: 'R',
+                      defaultsTo: false, 
+                      help: 'make the client will retain',
+                      callback: (wr) => willRetain = wr );
+   
+    return parser;  
   }
+  
+}
+main(List<String> args) {
+  MqttSubOptions mqttOptions = new MqttSubOptions();
+  mqttOptions.argParser().parse(args);
   
   // Create MqttClient
   MqttClient<MqttConnectionIOSocket> c = new MqttClient(new MqttConnectionIOSocket.setOptions(host:mqttOptions.host, port: mqttOptions.port), 
