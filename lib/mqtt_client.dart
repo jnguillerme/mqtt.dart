@@ -190,7 +190,8 @@ class MqttClient<E extends VirtualMqttConnection> {
     * 
     * Return the data that has not been processed
     */
-   List<int> _processMqttMessage(data) {
+   List<int> _processMqttMessage(ByteBuffer details) {
+     var data = details.asInt8List();
      num type = data[0] >> 4;
      int msgProcessedLength = data.length; 
      
