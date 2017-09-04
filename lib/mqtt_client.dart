@@ -11,6 +11,9 @@ class MqttClient<E extends VirtualMqttConnection> {
   var onSubscribeData = null;
   var onConnectionLost = null;
   Map<int, Completer>  _messagesToCompleteMap;
+
+  String userName;
+  String userPassword;
   
   var _liveTimer;
 
@@ -20,7 +23,7 @@ class MqttClient<E extends VirtualMqttConnection> {
   /**
    * MqttClient constructor
    */
-  MqttClient(E mqttConnection, {String clientID: '', num qos: 0x0, bool cleanSession:true} )
+  MqttClient(E mqttConnection, {String clientID: '', num qos: 0x0, bool cleanSession:true, String this.userName, String this.userPassword} )
               : _mqttConnection = mqttConnection, _clientID = clientID, _qos = qos, _cleanSession = cleanSession, debugMessage = false, _will = null;  
   
   /**
@@ -40,8 +43,11 @@ class MqttClient<E extends VirtualMqttConnection> {
    * An optional callback can be provided to be called when 
    * the connection to the mqtt broker has been lost
   */
-  Future<int> connect([onConnectionLostCallback]) {
+  Future<int> connect([onConnectionLostCallback, String uName, String uPassword]) {
     _connack = new Completer();
+
+    userName = uName != null ? uName : userName;
+    userPassword = uPassword != null ? uPassword : userPassword;
     
     if (onConnectionLostCallback != null) onConnectionLost = onConnectionLostCallback;
     
@@ -164,6 +170,10 @@ class MqttClient<E extends VirtualMqttConnection> {
    void _openSession() {
      print("Opening session");
      MqttMessageConnect m = new MqttMessageConnect.setOptions(_clientID, _qos, _cleanSession);
+
+     m._userName= userName;
+     m._password = userPassword;
+     m.setUserNameAndPassword(userName, userPassword);
      
      // set will
      m.setWill(_will);
@@ -190,7 +200,11 @@ class MqttClient<E extends VirtualMqttConnection> {
     * 
     * Return the data that has not been processed
     */
-   List<int> _processMqttMessage(data) {
+   List<int> _processMqttMessage(dynamic details) {
+     var data = details;
+
+     if (details.runtimeType.toString() != 'Uint8List') data = details.asInt8List();
+
      num type = data[0] >> 4;
      int msgProcessedLength = data.length; 
      
