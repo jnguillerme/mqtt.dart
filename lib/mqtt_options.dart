@@ -25,24 +25,46 @@ class MqttOptions {
   int willQoS = QOS_0;
   bool willRetain = false;
 
+ ///
+  /// initFromConfig
+  /// Init MQTT options from an ini file
+  /// supported format options are :
+  /// mqtt_paramSection.paramName = paramValue
+  ///   i.e. mqtt_broker.host = test.mosquitto.org
+  /// or
+  /// [mqtt_paramSection]
+  /// paramName = paramValue
+  /// i.e.
+  /// [mqtt_broker]
+  /// host = test.mosquitto.org
+  /// port = 1234
+  /// 
   MqttOptions.initFromConfig(String configFile)  {    
-    File cfgFile = new File(configFile);
-    _config = Config.readFileSync(cfgFile);
+    new File(configFile).readAsLines()
+    .then((lines) => new Config.fromStrings(lines))
+    .then((Config config) => processConfig(config));
+  }
 
-    optionList.forEach((k,v) =>  processOptionsForSection(k, v) );
+  void processConfig(config)
+  {
+    config.defaults().forEach((p,v) =>  processDefaultOption(p, v));
+    config.sections().forEach((sectionName) => processOptionsForSection(sectionName, config.items(sectionName)));
   }
-  
+
+  void processDefaultOption(paramName, paramValue)
+  {
+    setOption(paramName, paramValue);
+  }
+
   void processOptionsForSection(section, options) {
-    options.forEach( (v) => setOption(section + "." + v, section, v ));
-    
+    options.forEach( (v) => setOption(section + "." + v, v ));
   }
-  bool setOption(String option, String section, String param) {
+
+  bool setOption(String option, String value) {
     bool valueUsed = true;
-    String value = _config.get(section, param);  
-    print ("[${section}] ${param} ");
-    print ("=> ${value}");
+    print ("[${option}] ${value} ");
     
-    if (value != null && section.contains('mqtt_')) {
+    if (value != null && option.contains('mqtt_')) {
       switch (option) {
         case 'mqtt_options.debug': 
           valueUsed = false;
