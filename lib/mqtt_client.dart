@@ -8,12 +8,11 @@ class MqttClient<E extends VirtualMqttConnection> {
   final num _qos;
   final bool _cleanSession;
   Completer  _connack;
-  var onSubscribeData = null;
+  Map<String, Function> _onSubscribeDataMap = null;
   var onConnectionLost = null;
   Map<int, Completer>  _messagesToCompleteMap;
-
-  String userName;
-  String userPassword;
+  final String _userName;
+  final String _password;
   
   var _liveTimer;
 
@@ -23,8 +22,9 @@ class MqttClient<E extends VirtualMqttConnection> {
   /**
    * MqttClient constructor
    */
-  MqttClient(E mqttConnection, {String clientID: '', num qos: 0x0, bool cleanSession:true, String this.userName, String this.userPassword} )
-              : _mqttConnection = mqttConnection, _clientID = clientID, _qos = qos, _cleanSession = cleanSession, debugMessage = false, _will = null;  
+  MqttClient(E mqttConnection, {String clientID: '', num qos: 0x0, bool cleanSession:true, String userName: null, String password: null} )
+              : _mqttConnection = mqttConnection, _clientID = clientID, _qos = qos, _cleanSession = cleanSession, debugMessage = false,
+              _will = null, _userName = userName, _password = password;
   
   /**
    * setWill
@@ -43,11 +43,8 @@ class MqttClient<E extends VirtualMqttConnection> {
    * An optional callback can be provided to be called when 
    * the connection to the mqtt broker has been lost
   */
-  Future<int> connect([onConnectionLostCallback, String uName, String uPassword]) {
+  Future<int> connect([onConnectionLostCallback]) {
     _connack = new Completer();
-
-    userName = uName != null ? uName : userName;
-    userPassword = uPassword != null ? uPassword : userPassword;
     
     if (onConnectionLostCallback != null) onConnectionLost = onConnectionLostCallback;
     
@@ -73,12 +70,21 @@ class MqttClient<E extends VirtualMqttConnection> {
    * subscribe
    * subscribe to topic topic with QOS level QOS
    */
-  Future<MqttMessageSuback> subscribe(String topic, int QoS, onSubscribeDataCallback, [num messageID = 1]) {
+  Future<MqttMessageSuback> subscribe(String topic, int QoS, onSubscribeDataCallback, [num messageID = -1]) {
     print("Subscribe to $topic - QoS: $QoS - Message ID: $messageID");
+
+    if (_onSubscribeDataMap == null)  _onSubscribeDataMap = new Map<String, Function>();
+      
+    _onSubscribeDataMap[topic] = onSubscribeDataCallback;
+    if (messageID == -1) {
+       messageID = _onSubscribeDataMap.length;
+       print("Subscribe Message ID: $messageID");
+    } 
     Completer suback = _addMessageToComplete(messageID, QOS_1, new MqttMessageSuback());   // send as QOS_1 as a SUBACK is expected
     
-    onSubscribeData = onSubscribeDataCallback;
-    
+   
+
+  
     MqttMessageSubscribe m = new MqttMessageSubscribe.setOptions(topic, messageID, QoS);
     _mqttConnection.sendMessageToBroker(m, debugMessage);
     
@@ -171,10 +177,9 @@ class MqttClient<E extends VirtualMqttConnection> {
      print("Opening session");
      MqttMessageConnect m = new MqttMessageConnect.setOptions(_clientID, _qos, _cleanSession);
 
-     m._userName= userName;
-     m._password = userPassword;
-     m.setUserNameAndPassword(userName, userPassword);
-     
+     if (_userName != null && _password != null) {
+       m.setUserNameAndPassword(_userName, _password);
+     }
      // set will
      m.setWill(_will);
      _mqttConnection.sendMessageToBroker(m, debugMessage);
@@ -200,11 +205,7 @@ class MqttClient<E extends VirtualMqttConnection> {
     * 
     * Return the data that has not been processed
     */
-   List<int> _processMqttMessage(dynamic details) {
-     var data = details;
-
-     if (details.runtimeType.toString() != 'Uint8List') data = details.asInt8List();
-
+   List<int> _processMqttMessage(data) {
      num type = data[0] >> 4;
      int msgProcessedLength = data.length; 
      
@@ -325,7 +326,8 @@ class MqttClient<E extends VirtualMqttConnection> {
     
       print("[mqttClient] [" + m._topic + "][" + m._payload + "]");
       // notify the client of the new topic / payload
-      if (onSubscribeData != null) onSubscribeData(m._topic, m._payload);
+      if (_onSubscribeDataMap != null && _onSubscribeDataMap[m._topic] != null) 
+        _onSubscribeDataMap[m._topic](m._topic, m._payload);
       
       return m.len;
     }
