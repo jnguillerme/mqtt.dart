@@ -1,5 +1,4 @@
-import 'package:unittest/unittest.dart';
-import 'package:unittest/vm_config.dart';
+import 'package:test/test.dart';
 
 import '../lib/mqtt_shared.dart';
 
@@ -12,13 +11,12 @@ class MqttMessagePublishMatcher extends Matcher {
     return (_expected == actual);
   }
   
-  Description describe(Description description) {
-    description.add("MqttMessage");
-  }
+   describe(Description description) {
+     return description.add("MqttMessage");
+   }
 }
 
 main() {
-  useVMConfiguration();
 
   testPublish("MqttMessagePublish QOS(0) - no retain", QOS_0, 0);
   testPublish("MqttMessagePublish QOS(1) - no retain", QOS_1, 0);
