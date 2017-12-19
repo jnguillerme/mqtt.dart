@@ -15,7 +15,7 @@ class MqttClient<E extends VirtualMqttConnection> {
   final String _password;
   
   var _liveTimer;
-
+  
   bool debugMessage;
   MqttWill _will;
   
