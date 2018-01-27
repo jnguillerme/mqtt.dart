@@ -41,10 +41,10 @@ abstract class MqttMessage {
    *    - a payload (message specific)
    */
   MqttMessage.decode(List<int> data, [bool debugMessage = false]) {
-    decodeFixedHeader(data);
-    num vhLen = decodeVariableHeader(data.sublist(2));
-    if (data.length > 2 + vhLen) {
-      decodePayload(data.sublist(2 + vhLen));
+    num fhLen = decodeFixedHeader(data);
+    num vhLen = decodeVariableHeader(data.sublist(fhLen));
+    if (data.length > fhLen + vhLen) {
+      decodePayload(data.sublist(fhLen + vhLen));
     }
     
     if (debugMessage) {
@@ -137,9 +137,11 @@ abstract class MqttMessage {
    *    bit 2 - 1 : Qos Level
    *    bit 0     : RETAIN
    * 
-   * Byte 2 : Remaining length   
+   * Byte 2 : Remaining length  
+   * 
+   * Returns length of fixed header. 
    */
-  decodeFixedHeader(data) {
+  num decodeFixedHeader(data) {
     type = data[0] >> 4;
     DUP = data[0] & 0x1000;
     QoS = (data[0]>>1) & QOS_ALL;
@@ -158,6 +160,8 @@ abstract class MqttMessage {
     } while ( (digit & 0x80) != 0);
 
     len = remLength + 2;
+
+    return pos;
   }
 
   /**
