@@ -159,7 +159,7 @@ abstract class MqttMessage {
       multiplier *= 128;  
     } while ( (digit & 0x80) != 0);
 
-    len = remLength + 2;
+    len = remLength + pos;
 
     return pos;
   }
