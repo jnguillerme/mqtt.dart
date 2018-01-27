@@ -42,7 +42,7 @@ abstract class MqttMessage {
    */
   MqttMessage.decode(List<int> data, [bool debugMessage = false]) {
     num fhLen = decodeFixedHeader(data);
-    num vhLen = decodeVariableHeader(data.sublist(fhLen));
+    num vhLen = decodeVariableHeader(data.sublist(fhLen), fhLen);
     if (data.length > fhLen + vhLen) {
       decodePayload(data.sublist(fhLen + vhLen));
     }
@@ -82,6 +82,7 @@ abstract class MqttMessage {
     encodeFixedHeader();
     encodeVariableHeader();
     encodePayload();
+    len = _buf.length;
   }
 
   /**
@@ -170,7 +171,7 @@ abstract class MqttMessage {
    *
    * Return the length of the variable header
    */
-  num decodeVariableHeader(List<int> data) { return 0; }
+  num decodeVariableHeader(List<int> data, int fhLen) { return 0; }
   
   /**
    * decodePayload

@@ -21,7 +21,7 @@ class MqttMessageSuback extends MqttMessageAssured {
    *  byte 1 - Message ID MSB
    *  byte 2 - Message ID LSB
    */
-  num decodeVariableHeader(List<int> data) {
+  num decodeVariableHeader(List<int> data, int fhLen) {
     // assert(data.length == 3);
     
     messageID = 256 * data[0] + data[1];

@@ -83,7 +83,7 @@ class MqttMessagePublish extends MqttMessage {
    *
    * Return the length of the variable header
    */
-  num decodeVariableHeader(List<int> data)   {
+  num decodeVariableHeader(List<int> data, int fhLen)   {
     int pos = 0;
     num topicLength = 256 * data[pos++] + data[pos++];
     
@@ -95,7 +95,7 @@ class MqttMessagePublish extends MqttMessage {
       _msgID_LSB = data[pos++];
     }  
     
-    _payloadPos = 2 + pos;      // position for the 1st payload character = 2 (fixed header length) + pos (variable header length) 
+    _payloadPos = fhLen + pos;      // position for the 1st payload character = 2 (fixed header length) + pos (variable header length) 
     
     return pos;
   }
