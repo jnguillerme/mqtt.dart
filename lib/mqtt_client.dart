@@ -13,6 +13,7 @@ class MqttClient<E extends VirtualMqttConnection> {
   Map<int, Completer>  _messagesToCompleteMap;
   final String _userName;
   final String _password;
+  var _remData;
   
   var _liveTimer;
   
@@ -192,11 +193,20 @@ class MqttClient<E extends VirtualMqttConnection> {
     */
    
    void _processData(data) {
-     var remData = data;
+     if (_remData != null) {
+       // append data to remaining data
+       _remData.addAll(data);
+     } else {
+       // No remaining data
+       _remData = data;
+     }
      
+     var lenBefore, lenAfter;
      do {
-     remData = _processMqttMessage(remData);
-     } while (remData != null);     
+       lenBefore = _remData.length;
+       _remData = _processMqttMessage(_remData);
+       lenAfter = (_remData != null) ? _remData.length : 0;
+     } while (lenBefore != lenAfter && lenAfter >= 2);     
    }
    
    /**
@@ -315,6 +325,10 @@ class MqttClient<E extends VirtualMqttConnection> {
      */
     int _handlePublish(data) {
       MqttMessagePublish m = new MqttMessagePublish.decode(data, debugMessage);     
+      if (m.len > data.length) {
+        // Not enough data yet 
+        return 0;
+      }
       
       // QOS_1 and QOS_2 messages need to be acked
       if (m.QoS > 0) {   
