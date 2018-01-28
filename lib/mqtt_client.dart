@@ -198,7 +198,7 @@ class MqttClient<E extends VirtualMqttConnection> {
        _remData.addAll(data);
      } else {
        // No remaining data
-       _remData = data;
+       _remData = data.toList(growable:true);
      }
      
      var lenBefore, lenAfter;
