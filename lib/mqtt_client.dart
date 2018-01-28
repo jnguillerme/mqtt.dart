@@ -338,7 +338,9 @@ class MqttClient<E extends VirtualMqttConnection> {
         _resetTimer();      
       } 
     
-      print("[mqttClient] [" + m._topic + "][" + m._payload + "]");
+      if (debugMessage) {
+        print("[mqttClient] [" + m._topic + "][" + m._payload + "]");
+      }
       // notify the client of the new topic / payload
       if (_onSubscribeDataMap != null && _onSubscribeDataMap[m._topic] != null) 
         _onSubscribeDataMap[m._topic](m._topic, m._payload);
