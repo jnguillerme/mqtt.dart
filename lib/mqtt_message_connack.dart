@@ -20,7 +20,7 @@ class MqttMessageConnack extends MqttMessage {
    *  byte 1 - reserved value. Not used
    *  byte 2 - return code
    */
-  num decodeVariableHeader(List<int> data) {
+  num decodeVariableHeader(List<int> data, int fhLen) {
     assert(data.length == 2);
     
     returnCode = data[1];

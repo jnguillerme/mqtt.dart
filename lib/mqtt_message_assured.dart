@@ -34,7 +34,7 @@ abstract class MqttMessageAssured extends MqttMessage {
    *  byte 1 - Message ID MSB
    *  byte 2 - Message ID LSB
    */
-  num decodeVariableHeader(List<int> data) {
+  num decodeVariableHeader(List<int> data, int fhLen) {
     assert(data.length == 2);
     
     _msgID_MSB = data[0];
