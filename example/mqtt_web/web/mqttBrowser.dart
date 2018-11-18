@@ -2,37 +2,38 @@ import 'dart:html';
 import 'package:mqtt/mqtt_shared.dart';
 import 'package:mqtt/mqtt_connection_html_websocket.dart';
 
+const query = querySelector;
 
 class MqttBrowser {
-  
+
   MqttClient c;
   static num subID;
   num _msgID = 0;
-  
+
   void connectToBroker() {
     InputElement brokerUrl = query("#txt-broker-url");
     print("connecting to ${brokerUrl.value}");
     MqttConnectionHtmlWebSocket mqttCnx = new MqttConnectionHtmlWebSocket.setOptions(brokerUrl.value);
     c = new MqttClient(mqttCnx,clientID: "browser", qos: QOS_1);
-  
+
     c.connect(MqttBrowser.onConnectionLost)
-      .then((c) => MqttBrowser.onConnected() );  
-        
+      .then((c) => MqttBrowser.onConnected() );
+
   }
-  
+
   void disconnectFromBroker() {
-    
-    if (c != null) { 
-      c.disconnect();  
+
+    if (c != null) {
+      c.disconnect();
       ButtonElement btnConnect = query("#btn-connect");
       btnConnect.disabled = false;
-      
+
       ButtonElement btnDisconnect = query("#btn-disconnect");
       btnDisconnect.disabled = true;
 
-    }    
+    }
   }
-  
+
   void subscribe() {
     InputElement topic = query("#txt-subscribe-topic");
     print("subscribing to ${topic.value}");
@@ -47,9 +48,9 @@ class MqttBrowser {
     if (c != null) {
       c.unsubscribe(topic.value, subID)
           .then( (s) => onUnsubscribed());
-    }  
+    }
   }
-  
+
   void publish() {
     InputElement topic = query("#txt-publish-topic");
     InputElement message = query("#txt-publish-msg");
@@ -60,58 +61,58 @@ class MqttBrowser {
     }
   }
 
-  static void onSubscribed(s) {     
+  static void onSubscribed(s) {
     print("Subscription done - ID: ${s.messageID} - Qos: ${s.grantedQoS}");
     subID = s.messageID;
     ButtonElement btnSubscribe = query("#btn-subscribe");
     btnSubscribe.disabled = true;
-    
+
     ButtonElement btnUnsubscribe = query("#btn-unsubscribe");
     btnUnsubscribe.disabled = false;
-    
+
   }
   static void onSubscribeData(topic, data) {
     print("[$topic] $data");
     addMessageToList(topic, data);
   }
-  
-  static void onUnsubscribed() { 
+
+  static void onUnsubscribed() {
     print("Subscription cancelled");
-    
+
     ButtonElement btnSubscribe = query("#btn-subscribe");
     btnSubscribe.disabled = false;
-    
+
     ButtonElement btnUnsubscribe = query("#btn-unsubscribe");
     btnUnsubscribe.disabled = true;
-    
+
   }
-  
+
   static void onConnected() {
     print("Connected !");
     ButtonElement btnConnect = query("#btn-connect");
     btnConnect.disabled = true;
-    
+
     ButtonElement btnDisconnect = query("#btn-disconnect");
     btnDisconnect.disabled = false;
-    
+
     ButtonElement btnSubscribe = query("#btn-subscribe");
     btnSubscribe.disabled = false;
-    
+
     ButtonElement btnPublish = query("#btn-publish");
     btnPublish.disabled = false;
 
   }
   static void onConnectionLost() {
-    print("Connection to broker lost");  
+    print("Connection to broker lost");
   }
-  
-  
+
+
   static void addMessageToList(topic, data){
     StringBuffer msg = new StringBuffer();
     msg.writeAll(["[", topic, "] : ", data]);
-    
+
     DivElement itemContainer = query("#subMsgs");
-    
+
     DivElement subMsgElement = new Element.tag("div");
     subMsgElement.classes.add("subMsg");
     subMsgElement.text = msg.toString();
@@ -122,7 +123,7 @@ class MqttBrowser {
 main() {
   var myHeading = new Element.html("<h2>Mqtt Client test</h2>");
   document.body.children.add(myHeading);
-  
+
   var brokerHostLbl = new Element.html("<strong>Broker Url:</strong>");
   document.body.children.add(brokerHostLbl);
 
@@ -131,15 +132,15 @@ main() {
   //brokerUrl.placeholder = "Enter the broker url";
   brokerUrl.value = "ws://127.0.0.1:8080";
   document.body.children.add(brokerUrl);
-    
+
   ButtonElement btnConnect = new Element.tag("button");
   btnConnect.id = "btn-connect";
   btnConnect.text = "Connect";
   document.body.children.add(btnConnect);
 
-  
+
   MqttBrowser mqtt = new MqttBrowser();
-  
+
   btnConnect.onClick.listen( (e) => mqtt.connectToBroker());
 
   ButtonElement btnDisconnect = new Element.tag("button");
@@ -151,7 +152,7 @@ main() {
   btnDisconnect.onClick.listen( (e) => mqtt.disconnectFromBroker());
 
   document.body.children.add(new Element.html("</br>"));
- 
+
   var subscribeLbl = new Element.html("<strong>Subscribe topic:</strong>");
   document.body.children.add(subscribeLbl);
 
@@ -165,7 +166,7 @@ main() {
   btnSubscribe.text = "Subscribe";
   btnSubscribe.disabled = true;
   document.body.children.add(btnSubscribe);
-  
+
   btnSubscribe.onClick.listen( (e) => mqtt.subscribe());
 
   ButtonElement btnUnsubscribe= new Element.tag("button");
@@ -192,23 +193,23 @@ main() {
   publishMessage.id = "txt-publish-msg";
   publishMessage.placeholder = "Enter the message to publish";
   document.body.children.add(publishMessage);
-  
-  
+
+
   ButtonElement btnPublish = new Element.tag("button");
   btnPublish.id = "btn-publish";
   btnPublish.text = "Publish";
   btnPublish.disabled = true;
   document.body.children.add(btnPublish);
-  
+
   btnPublish.onClick.listen( (e) => mqtt.publish());
 
-  
+
   DivElement subMsgList = new Element.tag("div");
   subMsgList.id = "subMsgs";
   subMsgList.style.width = "300px";
   subMsgList.style.border = "1px solid black";
   subMsgList.innerHtml = "&nbsp";
   document.body.children.add(subMsgList);
-  
-  
+
+
 }

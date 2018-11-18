@@ -1,5 +1,7 @@
 name: sample_pubspec
 description: A sample mqtt web application
+environment:
+  sdk: '>=2.0.0 <3.0.0'
 dependencies:
-  browser: any
-  mqtt: any
+  mqtt:
+    path: ../../
