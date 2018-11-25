@@ -13,7 +13,7 @@ class MqttBrowser {
   void connectToBroker() {
     InputElement brokerUrl = query("#txt-broker-url");
     print("connecting to ${brokerUrl.value}");
-    MqttConnectionHtmlWebSocket mqttCnx = new MqttConnectionHtmlWebSocket.setOptions(brokerUrl.value);
+    MqttConnectionHtmlWebSocket mqttCnx = new MqttConnectionHtmlWebSocket.setOptions(brokerUrl.value, "mqttv3.1");
     c = new MqttClient(mqttCnx,clientID: "browser", qos: QOS_1);
 
     c.connect(MqttBrowser.onConnectionLost)
