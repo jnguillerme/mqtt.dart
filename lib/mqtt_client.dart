@@ -198,7 +198,11 @@ class MqttClient<E extends VirtualMqttConnection> {
        _remData.addAll(data);
      } else {
        // No remaining data
-       _remData = Uint8List.fromList(data);
+         if (data is ByteBuffer) {
+             _remData = data.asUint8List();
+         } else {
+             _remData = Uint8List.fromList(data);
+         }
      }
 
      var lenBefore, lenAfter;
