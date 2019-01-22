@@ -7,16 +7,16 @@ final num KEEPALIVE = 30;
  * This abstract class describes an mqttMessage
  * It will be extended for each specific mqtt message (CONNECT, PUBLISH ...)
  */
-abstract class MqttMessage {  
+abstract class MqttMessage {
   List<int> _buf;
   List<int> get buf => _buf;
-  
+
   int type;
   num len;
   int QoS;
   int DUP;
   int retain;
-  
+
   /**
    * default constructor
    */
@@ -25,16 +25,16 @@ abstract class MqttMessage {
   }
   /**
    * setOptions constructor
-   * Set the message options 
+   * Set the message options
    */
   MqttMessage.setOptions(this.type, this.len, [this.QoS = 0, this.retain = 0]) : DUP = 0 {
     _buf = new List<int>();
   }
-  
+
   /**
    * decode constructor
    * Decode data to initialize the mqtt message
-   * 
+   *
    * a message is made of
    *    - a fixed header
    *    - a variable header (message specific)
@@ -46,7 +46,7 @@ abstract class MqttMessage {
     if (data.length > fhLen + vhLen) {
       decodePayload(data.sublist(fhLen + vhLen));
     }
-    
+
     if (debugMessage) {
       print("<<< ${this.toString()}");
     }
@@ -62,7 +62,7 @@ abstract class MqttMessage {
   /**
    * operator ==
    */
-  bool operator == (MqttMessage other) {
+  bool operator == (other) {
     return ( type == other.type
           && len == other.len
           && QoS == other.QoS
@@ -93,12 +93,12 @@ abstract class MqttMessage {
    *    bit 3     : DUP flag
    *    bit 2 - 1 : Qos Level
    *    bit 0     : RETAIN
-   * 
+   *
    * Byte 2 : Remaining length
    */
-  encodeFixedHeader() {    
+  encodeFixedHeader() {
     _buf.add( ((type << 4) | (DUP << 3) | (QoS << 1) | retain) );   // byte 1
-    
+
     // byte 2 - encode remaining length
     if (len > 2) {
       num remLen = len - 2;
@@ -109,7 +109,7 @@ abstract class MqttMessage {
         if ( remLen > 0 ) {
           digit = (digit | 0x80);
         }
-        _buf.add(digit);                                                  
+        _buf.add(digit);
       } while (remLen > 0);
     }
     else {
@@ -121,15 +121,15 @@ abstract class MqttMessage {
    * Message specific - to be defined in extended classes
    */
   encodeVariableHeader() {}
-  
+
   /**
    * encodePayload
    * Message specific (Optional) - to be defined in extended classes
    */
-  encodePayload() {}  
+  encodePayload() {}
 
-   
-  /** 
+
+  /**
    * decodeFixedHeader
    * Decode the 2 byte mqtt fixed header
    * Byte 1 :
@@ -137,27 +137,27 @@ abstract class MqttMessage {
    *    bit 3     : DUP flag
    *    bit 2 - 1 : Qos Level
    *    bit 0     : RETAIN
-   * 
-   * Byte 2 : Remaining length  
-   * 
-   * Returns length of fixed header. 
+   *
+   * Byte 2 : Remaining length
+   *
+   * Returns length of fixed header.
    */
   num decodeFixedHeader(data) {
     type = data[0] >> 4;
     DUP = data[0] & 0x1000;
     QoS = (data[0]>>1) & QOS_ALL;
     retain = data[0] & 0x01;
-    
+
     num pos = 1;
     int digit;
     num remLength = 0;
     num multiplier = 1;
-    
+
     // remaining length
     do {
       digit = data[pos++];
       remLength += ((digit & 127) * multiplier);
-      multiplier *= 128;  
+      multiplier *= 128;
     } while ( (digit & 0x80) != 0);
 
     len = remLength + pos;
@@ -172,7 +172,7 @@ abstract class MqttMessage {
    * Return the length of the variable header
    */
   num decodeVariableHeader(List<int> data, int fhLen) { return 0; }
-  
+
   /**
    * decodePayload
    * Message specific (Optional) - to be defined in extended classes

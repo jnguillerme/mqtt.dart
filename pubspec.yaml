@@ -3,6 +3,8 @@ version: 1.0.1
 author: Jean-Noel Guillerme <jnguillerme@hotmail.com>
 description: mqtt dart client library
 homepage: https://github.com/jnguillerme/mqtt.dart
+environment:
+  sdk: '>=2.0.0 <3.0.0'
 dependencies:
   ini: '>=1.0.0'
   test: '>=0.12.0'
